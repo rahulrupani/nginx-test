@@ -1,35 +1,59 @@
+version: "3.8"
 services:
-  ### App Container ###
-  app:
+  blog_app:
+    container_name: blog_app
     build:
-      context: ./
-      dockerfile: ./docker/app/Dockerfile
-    ports:
-      - "8080:80"
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+    expose:
+      - 9000
     volumes:
-      - ./code/:/var/www/
-    networks:
-      - internal
+      - .:/usr/src/app
+      - ./public:/usr/src/app/public
     depends_on:
-      - mysql
-    ### MySQL Container ###
-  mysql:
-    build:
-      context: ./
-      dockerfile: ./docker/mysql/Dockerfile
-    environment:
-    - MYSQL_DATABASE=customer
-    - MYSQL_USER=google
-    - MYSQL_PASSWORD=google
-    - MYSQL_ROOT_PASSWORD=google
-    ports:
-    - "23306:3306"
-    volumes:
-    - ./data_save/db:/var/lib/mysql
+      - blog_db
     networks:
-    - internal
+      - app_network
 
-### Networks Setup ###
+  blog_nginx:
+    container_name: blog_nginx
+    build:
+      context: .
+      dockerfile: ./docker/nginx/Dockerfile
+      args:
+      - STAGE=local
+    volumes:
+      - ./public:/usr/src/app/public
+    ports:
+      - 8000:80
+    depends_on:
+      - blog_app
+    environment:
+      NGINX_FPM_HOST: blog_app
+      NGINX_ROOT: /usr/src/app/public
+    networks:
+      - app_network
+
+  blog_db:
+    container_name: blog_db
+    build:
+      context: .
+      dockerfile: ./docker/mysql/Dockerfile
+    #image: mysql:8.0.20
+    restart: always
+    volumes:
+      - ./storage/db-data:/var/lib/mysql
+    ports:
+      - 3306:3306
+#    environment:
+#      MYSQL_DATABASE: blog
+#      MYSQL_ROOT_PASSWORD: root
+#      MYSQL_USER: kuldeep
+#      MYSQL_PASSWORD: root
+    networks:
+      - app_network
+
+
 networks:
-  internal:
-    driver: "bridge"
+  app_network:
+    driver: bridge

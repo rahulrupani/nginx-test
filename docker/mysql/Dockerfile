@@ -1,4 +1,4 @@
-FROM mysql:5.7
+FROM --platform=linux/amd64 mysql:5.7
 
 LABEL maintainer=kuldeep@gmail.com
 ARG DOCKER_ARTIFACT_DIR=./docker
@@ -9,10 +9,10 @@ COPY $DOCKER_ARTIFACT_DIR//mysql/my.cnf /etc/mysql/conf.d/my.cnf
 
 RUN chown -R mysql:root /var/lib/mysql/
 
-ARG MYSQL_DATABASE=homestead
-ARG MYSQL_USER=homestead
-ARG MYSQL_PASSWORD=secret
-ARG MYSQL_ROOT_PASSWORD=root
+#ARG MYSQL_DATABASE=homestead
+#ARG MYSQL_USER=homestead
+#ARG MYSQL_PASSWORD=secret
+#ARG MYSQL_ROOT_PASSWORD=root
 
 ENV MYSQL_DATABASE=$MYSQL_DATABASE
 ENV MYSQL_USER=$MYSQL_USER
