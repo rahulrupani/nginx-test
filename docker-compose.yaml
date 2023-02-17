@@ -1,0 +1,35 @@
+services:
+  ### App Container ###
+  app:
+    build:
+      context: ./
+      dockerfile: ./docker/app/Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - ./code/:/var/www/
+    networks:
+      - internal
+    depends_on:
+      - mysql
+    ### MySQL Container ###
+  mysql:
+    build:
+      context: ./
+      dockerfile: ./docker/mysql/Dockerfile
+    environment:
+    - MYSQL_DATABASE=customer
+    - MYSQL_USER=google
+    - MYSQL_PASSWORD=google
+    - MYSQL_ROOT_PASSWORD=google
+    ports:
+    - "23306:3306"
+    volumes:
+    - ./data_save/db:/var/lib/mysql
+    networks:
+    - internal
+
+### Networks Setup ###
+networks:
+  internal:
+    driver: "bridge"
